@@ -60,3 +60,36 @@ This is a Node.js and Express-based backend application that allows users to tra
 └── README.md
 ```
 
+## Installation
+
+1. Clone the repository:
+
+```bash
+  git clone https://github.com/sarthakkurothe/convin_backend.git
+```
+
+2. Navigate to the project directory:
+
+```bash
+  cd convin_backend_main
+```
+
+3. Install the dependencies:
+
+```bash
+  npm install
+```
+
+4. Create a `.env` file in the root of the project and add your MongoDB connection string and PORT.
+
+```bash
+PORT=5000
+MONGO_URI=<your-mongodb-connection-string>
+JWT_SECRET=<your-jwt-secret>
+```
+
+5. Run the application:
+
+```bash
+npm run dev
+```
