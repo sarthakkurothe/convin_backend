@@ -426,8 +426,6 @@ Error responses:
 
 **2.4 Download Balance Sheet**
 
-**2.2 Get Overall Expenses**
-
 - **URL**: `/api/expenses/download-balance-sheet`
 - **Method**: `GET`
 - **Description**: This endpoint allows the authenticated user to download a balance sheet     detailing expenses shared with other participants. The balance sheet shows how much each participant owes or is owed, based on the split method used for each expense. It can be generated in CSV or PDF format.
