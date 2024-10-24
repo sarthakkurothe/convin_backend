@@ -503,7 +503,8 @@ Example:
   }
 ```
 
-**Error Handling**
+**4. Error Handling**
+
 For all API endpoints, proper error handling is implemented to ensure smooth user experience and provide descriptive messages for all failure cases.
 
 - `400 Bad Request`: For invalid input, missing fields, or incorrect data types.
@@ -537,7 +538,7 @@ For all API endpoints, proper error handling is implemented to ensure smooth use
 }
 ```
 
-**Testing**
+## Testing
 
 The project includes unit tests for user and expense routes.
 
