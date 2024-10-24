@@ -92,14 +92,14 @@ JWT_SECRET=<your-jwt-secret>
 npm run dev
 ```
 
-**API Endpoints**
+## API Documentation
 
 **1. User Authentication Endpoints**
 
 **1.1 Register User**
 
 - **URL**: `/api/users/register`
-- **Method**: POST
+- **Method**: `POST`
 - **Description**:  Create a new user with name, email, password, and mobile number.
 - **Request Body**:
 
@@ -147,7 +147,7 @@ Error Responses:
 **1.2 Login User**
 
 - **URL**: `/api/users/login`
-- **Method**: POST
+- **Method**: `POST`
 - **Description**: Authenticate a user with email and password, returning a JWT token.
 - **Request Body**:
 
@@ -185,7 +185,7 @@ Error Responses:
 **1.3 Get User Details**
 
 - **URL**: `/api/users/me`
-- **Method**: GET
+- **Method**: `GET`
 - **Description**: Retrieve details of the authenticated user.
 - **Authorization**: Bearer Token
   
@@ -212,107 +212,254 @@ Error responses:
 }
 ```
 
-**2. Expense Management API Endpoints**
+**2. Expense Management Endpoints**
 
 **2.1 Add a New Expense**
 
-- **URL**: /api/expenses
-- **Method**: POST
-- **Description**: Add a new expense with details about title, amount, and participants.
-- **Authorization**: Bearer Token
+- **URL**: `/api/expenses`
+- **Method**: `POST`
+- **Description**: Add a new expense and split it between users using one of the three methods: Equal, Exact, or Percentage.
+- **Authorization**: Bearer Token (JWT)
 - **Request Body**:
+  - `description` (string): A short description of the expense.
+  - `amount` (number): Total expense amount.
+  - `paidBy` (string): The ID of the user who paid the amount.
+  - `splitMethod` (string): The method used to split the expense. Options: `equal`, `exact`,        `percentage`.
+  - `participants` (array): Array of user objects with details on how the expense is shared.        Each object contains:
+    - `user` (string): The ID of the participant.
+    - `exactAmount` (number) (for `exact` split)
+    - `percentage` (number) (for `percentage` split)
 
-json
+**Example Request Body for Equal Split:**
 
-Copy code
+```bash
+  {
+  "description": "Dinner with friends",
+  "amount": 3000,
+  "paidBy": "64fa6bde7f8e5d2e3a2f9011",
+  "splitMethod": "equal",
+  "participants": [
+    { "user": "64fa6bde7f8e5d2e3a2f9011" },
+    { "user": "64fa6bde7f8e5d2e3a2f9012" },
+    { "user": "64fa6bde7f8e5d2e3a2f9013" }
+    ]
+  }
+```
 
-{
+**Example Request Body for Exact Split:**
 
-`  `"title": "Dinner",
+```bash
+  {
+  "description": "Shopping trip",
+  "amount": 4299,
+  "paidBy": "64fa6bde7f8e5d2e3a2f9011",
+  "splitMethod": "exact",
+  "participants": [
+    { "user": "64fa6bde7f8e5d2e3a2f9011", "exactAmount": 1500 },
+    { "user": "64fa6bde7f8e5d2e3a2f9012", "exactAmount": 799 },
+    { "user": "64fa6bde7f8e5d2e3a2f9013", "exactAmount": 2000 }
+    ]
+  }
+```
 
-`  `"amount": 100,
+**Example Request Body for Percentage Split:**
 
-`  `"splitMethod": "equal",
+```bash
+  {
+  "description": "Party expenses",
+  "amount": 2000,
+  "paidBy": "64fa6bde7f8e5d2e3a2f9011",
+  "splitMethod": "percentage",
+  "participants": [
+    { "user": "64fa6bde7f8e5d2e3a2f9011", "percentage": 50 },
+    { "user": "64fa6bde7f8e5d2e3a2f9012", "percentage": 25 },
+    { "user": "64fa6bde7f8e5d2e3a2f9013", "percentage": 25 }
+    ]
+  }
+```
 
-`  `"participants": [
+**Success Response (201 Created):**
 
-`    `{ "user": "user\_id1" },
+```bash
+  {
+  "_id": "64fa7bde7f8e5d2e3a2f9021",
+  "description": "Dinner with friends",
+  "amount": 3000,
+  "paidBy": "64fa6bde7f8e5d2e3a2f9011",
+  "splitMethod": "equal",
+  "participants": [
+    { "user": "64fa6bde7f8e5d2e3a2f9011", "amountOwed": 1000 },
+    { "user": "64fa6bde7f8e5d2e3a2f9012", "amountOwed": 1000 },
+    { "user": "64fa6bde7f8e5d2e3a2f9013", "amountOwed": 1000 }
+    ]
+  }
+```
 
-`    `{ "user": "user\_id2" }
+**Error Responses:**
 
-`  `]
+1. **400 Bad Request:** Invalid data provided or missing fields.
 
-}
+```bash
+  {
+  "message": "Invalid input data"
+  }
+```
 
-- **Success Response**:
-  - **Status**: 201 Created
-  - **Response Body**:
+2. **401 Unauthorized:** No token or invalid token.
 
-json
+```bash
+  {
+  "message": "Not authorized, no token"
+  }
+```
 
-Copy code
+3. **422 Unprocessable Entity:** Percentage split doesn't add up to 100%.
 
-{
+```bash
+  {
+  "message": "Percentages must add up to 100"
+  }
+```
 
-`  `"\_id": "expense\_id",
+**2.2 Get Individual User Expenses**
 
-`  `"title": "Dinner",
+- **URL**: `/api/expenses/user/:userId`
+- **Method**: `GET`
+- **Description**: Retrieve all expenses where the user is a participant.
+- **Authorization**: Bearer Token (JWT)
 
-`  `"amount": 100,
+**Success Response (200 OK):**
 
-`  `"participants": [ "user\_id1", "user\_id2" ],
+```bash
+  [
+  {
+    "_id": "64fa7bde7f8e5d2e3a2f9021",
+    "description": "Dinner with friends",
+    "amount": 3000,
+    "paidBy": "64fa6bde7f8e5d2e3a2f9011",
+    "splitMethod": "equal",
+    "participants": [
+      { "user": "64fa6bde7f8e5d2e3a2f9011", "amountOwed": 1000 },
+      { "user": "64fa6bde7f8e5d2e3a2f9012", "amountOwed": 1000 },
+      { "user": "64fa6bde7f8e5d2e3a2f9013", "amountOwed": 1000 }
+    ]
+  },
+  {
+    "_id": "64fa7bde7f8e5d2e3a2f9022",
+    "description": "Shopping trip",
+    "amount": 4299,
+    "paidBy": "64fa6bde7f8e5d2e3a2f9011",
+    "splitMethod": "exact",
+    "participants": [
+      { "user": "64fa6bde7f8e5d2e3a2f9011", "exactAmount": 1500 },
+      { "user": "64fa6bde7f8e5d2e3a2f9012", "exactAmount": 799 },
+      { "user": "64fa6bde7f8e5d2e3a2f9013", "exactAmount": 2000 }
+      ]
+    }
+  ]
+```
 
-`  `"createdBy": "creator\_user\_id"
+**Error Responses:**
 
-}
+1. **401 Unauthorized:**  No token or invalid token.
 
-**2.2 Get User Expenses**
+```bash
+  {
+  "message": "Not authorized, no token"
+  }
+```
 
-- **URL**: /api/expenses/user
-- **Method**: GET
-- **Description**: Get all expenses where the authenticated user is a participant.
-- **Authorization**: Bearer Token
-- **Success Response**:
-  - **Status**: 200 OK
-  - **Response Body**:
+2. **404 Not Found:** If the user does not have any recorded expenses.
 
-json
+```bash
+  {
+  "message": "No expenses found for this user"
+  }
+```
 
-Copy code
+**2.2 Get Overall Expenses**
 
-[
+- **URL**: `/api/expenses/`
+- **Method**: `GET`
+- **Description**: Retrieve all expenses across all users.
+- **Authorization**: Bearer Token (JWT)
 
-`  `{
+**Success Response (200 OK):**
 
-`    `"\_id": "expense\_id",
-
-`    `"title": "Dinner",
-
-`    `"amount": 100,
-
-`    `"participants": [ "user\_id1" ],
-
-`    `"createdBy": "creator\_user\_id"
-
-`  `}
-
+```bash
+  [
+  {
+    "_id": "64fa7bde7f8e5d2e3a2f9021",
+    "description": "Dinner with friends",
+    "amount": 3000,
+    "paidBy": "64fa6bde7f8e5d2e3a2f9011",
+    "splitMethod": "equal",
+    "participants": [
+      { "user": "64fa6bde7f8e5d2e3a2f9011", "amountOwed": 1000 },
+      { "user": "64fa6bde7f8e5d2e3a2f9012", "amountOwed": 1000 },
+      { "user": "64fa6bde7f8e5d2e3a2f9013", "amountOwed": 1000 }
+    ]
+  },
+  {
+    "_id": "64fa7bde7f8e5d2e3a2f9022",
+    "description": "Shopping trip",
+    "amount": 4299,
+    "paidBy": "64fa6bde7f8e5d2e3a2f9011",
+    "splitMethod": "exact",
+    "participants": [
+      { "user": "64fa6bde7f8e5d2e3a2f9011", "exactAmount": 1500 },
+      { "user": "64fa6bde7f8e5d2e3a2f9012", "exactAmount": 799 },
+      { "user": "64fa6bde7f8e5d2e3a2f9013", "exactAmount": 2000 }
+    ]
+  }
 ]
+```
 
-**2.3 Download Balance Sheet**
+**Error Reponses:**
 
-- **URL**: /api/expenses/download-balance-sheet
-- **Method**: GET
-- **Description**: Download a CSV file showing how expenses are split among participants.
-- **Authorization**: Bearer Token
-- **Response**: Downloads the CSV file.
------
-**API Testing with Postman**
+1. **401 Unauthorized:** No token or invalid token.
 
-1. **Postman Collection**: Create a new collection in Postman for the Daily Expense Sharing API.
-1. Add individual requests for each endpoint (registration, login, expense management).
-1. Use environment variables in Postman:
-   1. base\_url = http://localhost:5000
-   1. token = <your-token-from-login>
-1. **Bearer Token**: For all authenticated requests, use the Bearer token from the login response.
+```bash
+  {
+  "message": "Not authorized, no token"
+  }
+```
 
-For detailed step-by-step testing instructions, refer to the **API Testing Section** above.
+**2.4 Download Balance Sheet**
+
+**2.2 Get Overall Expenses**
+
+- **URL**: `/api/expenses/download-balance-sheet`
+- **Method**: `GET`
+- **Description**: This endpoint allows the authenticated user to download a balance sheet     detailing expenses shared with other participants. The balance sheet shows how much each participant owes or is owed, based on the split method used for each expense. It can be generated in CSV or PDF format.
+- **Authorization**: Bearer Token (JWT)
+
+**Expected Responses:**
+
+- **Status:** `200 OK`
+- **Response Body:** This endpoint allows the authenticated user to download a balance sheet detailing expenses shared with other participants. The balance sheet shows how much each participant owes or is owed, based on the split method used for each expense. It can be generated in CSV or PDF format.
+- **Sample CSV Format:**
+
+```bash
+  Expense Title,Amount,Owed By,Owed To,Amount Owed
+  Dinner,100,John Doe,Jane Smith,50
+  Groceries,150,John Doe,Jane Smith,75
+```
+
+**Error Reponses:**
+
+1. **401 Unauthorized:** Missing token or invalid token.
+
+```bash
+  {
+  "message": "Not authorized, no token"
+  }
+```
+
+2. **404 Not Found:** If no expenses exist for the user.
+
+```bash
+{
+  "message": "No expenses found"
+}
+```
