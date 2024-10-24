@@ -13,7 +13,6 @@ This is a Node.js and Express-based backend application that allows users to tra
 - [Running the Application](#running-the-application)
 - [API Documentation](#api-documentation)
 - [Testing](#testing)
-- [License](#license)
 
 ---
 
@@ -463,3 +462,91 @@ Error responses:
   "message": "No expenses found"
 }
 ```
+
+**3. Data Validation**
+
+**3.1 General Input Validation**
+
+- **Missing Fields:** If required fields (like `title`, `amount`, or `participants`) are missing, a **400 Bad Request** status is returned.
+
+Example:
+
+```bash
+  {
+  "message": "Expense title is required"
+  }
+```
+
+- **Invalid Data Types:** If the amount is not a valid number or if any field does not meet expected data types, the API returns a **400 Bad Request** status.
+
+```bash
+  {
+  "message": "Amount must be a number"
+  }
+```
+
+**3.2 Split Validation (for Expense Management)**
+
+- **Percentage Split Validation:** When using the percentage split method, the system checks if the percentages for all participants add up to 100%. If they don't, a 400 Bad Request status is returned.
+
+```bash
+  {
+  "message": "The percentages must add up to 100%"
+  }
+```
+
+- **Equal Split Validation:** When using the equal split method, the system ensures that the expense amount is equally divided among all participants. If the number of participants is invalid or missing, the API returns a **400 Bad Request** status.
+
+```bash
+  {
+  "message": "At least two participants are required for an equal split"
+  }
+```
+
+**Error Handling**
+For all API endpoints, proper error handling is implemented to ensure smooth user experience and provide descriptive messages for all failure cases.
+
+- `400 Bad Request`: For invalid input, missing fields, or incorrect data types.
+- `401 Unauthorized`: When the user is not authenticated or provides an invalid token.
+- `404 Not Found`: When a requested resource (e.g., expense) is not found.
+- `500 Internal Server Error`: For unexpected server issues.
+
+**Example Error Responses:**
+
+1. 401 Unauthorized – Missing or Invalid Token
+
+```bash
+{
+  "message": "Not authorized, no token"
+}
+```
+
+2. 400 Bad Request – Validation Error (e.g., invalid percentage split)
+
+```bash
+{
+  "message": "The percentages must add up to 100%"
+}
+```
+
+3. 404 Not Found – No Expenses Found
+
+```bash
+{
+  "message": "No expenses found"
+}
+```
+
+**Testing**
+
+The project includes unit tests for user and expense routes.
+
+1. **Run tests:**
+
+```bash
+  npm test
+```
+2. **Test Coverage:** The tests are written using Jest and Supertest.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
