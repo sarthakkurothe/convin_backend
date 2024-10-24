@@ -12,8 +12,6 @@ This is a Node.js and Express-based backend application that allows users to tra
 - [Environment Variables](#environment-variables)
 - [Running the Application](#running-the-application)
 - [API Documentation](#api-documentation)
-  - [User Authentication](#user-authentication-api-endpoints)
-  - [Expense Management](#expense-management-api-endpoints)
 - [Testing](#testing)
 - [License](#license)
 
@@ -98,115 +96,123 @@ npm run dev
 
 **1. User Authentication Endpoints**
 
-**1.1 Register a New User**
+**1.1 Register User**
 
-- **URL**: /api/users/register
+- **URL**: `/api/users/register`
 - **Method**: POST
-- **Description**: Register a new user.
+- **Description**:  Create a new user with name, email, password, and mobile number.
 - **Request Body**:
 
-json
+```bash
+  {
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "password123",
+  "mobile": "1234567890"
+  }
+```
 
-Copy code
+Success Response:
 
-{
+- **Code:** 201 Created
+- **Content:**
 
-`  `"name": "John Doe",
+```bash
+  {
+  "_id": "64fa6bde7f8e5d2e3a2f9011",
+  "name": "John Doe",
+  "email": "john@example.com",
+  "token": "<JWT_TOKEN>"
+  }
+```
 
-`  `"email": "john@example.com",
+Error Responses:
 
-`  `"password": "password123",
+- **400 Bad Request-** Missing required fields
 
-`  `"mobile": "1234567890"
+```bash
+  {
+  "message": "All fields are required"
+  }
+```
 
-}
+- **400 Bad Request-** User already exists
 
-- **Success Response**:
-  - **Status**: 201 Created
-  - **Response Body**:
-
-json
-
-Copy code
-
-{
-
-`  `"\_id": "user\_id",
-
-`  `"name": "John Doe",
-
-`  `"email": "john@example.com",
-
-`  `"token": "jwt-token"
-
-}
+```bash
+  {
+  "message": "User already exists"
+  }
+```
 
 **1.2 Login User**
 
-- **URL**: /api/users/login
+- **URL**: `/api/users/login`
 - **Method**: POST
-- **Description**: Log in an existing user.
+- **Description**: Authenticate a user with email and password, returning a JWT token.
 - **Request Body**:
 
-json
+```bash
+  {
+  "email": "john@example.com",
+  "password": "password123"
+  }
+```
 
-Copy code
+**Success Response**:
 
-{
+- **Code**: 200 OK
+- **Content**:
 
-`  `"email": "john@example.com",
+```bash
+  {
+  "_id": "64fa6bde7f8e5d2e3a2f9011",
+  "name": "John Doe",
+  "email": "john@example.com",
+  "token": "<JWT_TOKEN>"
+  }
+```
 
-`  `"password": "password123"
+Error Responses:
 
-}
+- **401 Unauthorized-** Invalid email or password:
 
-- **Success Response**:
-  - **Status**: 200 OK
-  - **Response Body**:
-
-json
-
-Copy code
-
-{
-
-`  `"\_id": "user\_id",
-
-`  `"name": "John Doe",
-
-`  `"email": "john@example.com",
-
-`  `"token": "jwt-token"
-
-}
+```bash
+  {
+  "message": "Invalid email or password"
+  }
+```
 
 **1.3 Get User Details**
 
-- **URL**: /api/users/me
+- **URL**: `/api/users/me`
 - **Method**: GET
 - **Description**: Retrieve details of the authenticated user.
 - **Authorization**: Bearer Token
-- **Success Response**:
-  - **Status**: 200 OK
-  - **Response Body**:
+  
+**Success Response**:
+  - **Code**: 200 OK
+  - **Content**:
 
-json
+```bash
+  {
+  "_id": "64fa6bde7f8e5d2e3a2f9011",
+  "name": "John Doe",
+  "email": "john@example.com",
+  "mobile": "1234567890"
+  }
+```
 
-Copy code
+Error responses:
 
+- **401 Unauthorized**- No token or invalid token:
+
+```bash
 {
-
-`  `"\_id": "user\_id",
-
-`  `"name": "John Doe",
-
-`  `"email": "john@example.com",
-
-`  `"mobile": "1234567890"
-
+  "message": "Not authorized, no token"
 }
+```
 
-**2. Expense Management Endpoints**
+**2. Expense Management API Endpoints**
 
 **2.1 Add a New Expense**
 
